@@ -2,9 +2,11 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - echo "Pr� build phase - Exemplo baixar dependencias se fosse necessario"
+      - echo "Pro build phase - Exemplo baixar dependencias se fosse necessario"
   build:
     commands:
+      - echo "Running tests"
+      - mvn clean test
       - echo "Building"
       - mvn clean compile package
   post_build:

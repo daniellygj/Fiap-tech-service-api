@@ -1,5 +1,6 @@
 package br.com.fiap.abctechservice.controller;
 
+import br.com.fiap.abctechservice.service.VersionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +14,12 @@ import java.util.Properties;
 @RequestMapping("/")
 public class HealthCheckController {
 
+    private VersionService versionService;
+
+    public HealthCheckController(VersionService versionService) {
+        this.versionService = versionService;
+    }
+
     @GetMapping
     public ResponseEntity<String> status() {
         return ResponseEntity.ok("Success!");
@@ -20,14 +27,6 @@ public class HealthCheckController {
 
     @GetMapping("version")
     public ResponseEntity<String> version() {
-        Properties properties = new Properties();
-        InputStream inputStream =  getClass().getClassLoader().getResourceAsStream("application.yml");
-        try {
-            properties.load(inputStream);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return ResponseEntity.ok(properties.getProperty("build.name") + " - " + properties.getProperty("build.version"));
+        return ResponseEntity.ok(versionService.getVersion());
     }
 }
