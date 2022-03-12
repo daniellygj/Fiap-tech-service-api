@@ -1,23 +1,19 @@
 package br.com.fiap.abctechservice.controller;
 
-import br.com.fiap.abctechservice.service.VersionService;
+import br.com.fiap.abctechservice.application.PropertiesComponent;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
 @RestController
 @RequestMapping("/")
 public class HealthCheckController {
 
-    private VersionService versionService;
+    private final PropertiesComponent propertiesComponent;
 
-    public HealthCheckController(VersionService versionService) {
-        this.versionService = versionService;
+    public HealthCheckController(PropertiesComponent propertiesComponent) {
+        this.propertiesComponent = propertiesComponent;
     }
 
     @GetMapping
@@ -27,6 +23,6 @@ public class HealthCheckController {
 
     @GetMapping("version")
     public ResponseEntity<String> version() {
-        return ResponseEntity.ok(versionService.getVersion());
+        return ResponseEntity.ok(propertiesComponent.getVersion());
     }
 }
