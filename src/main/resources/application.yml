@@ -1,0 +1,5 @@
+server:
+  port: 8081
+
+build.name: @project.name@
+build.version: @project.version@
