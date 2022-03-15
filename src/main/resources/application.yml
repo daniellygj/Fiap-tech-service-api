@@ -3,3 +3,12 @@ server:
 
 build.name: @project.name@
 build.version: @project.version@
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/abc_tech
+    username: root
+    password: Fiap1234
+  jpa:
+    hibernate:
+      ddl-auto: create

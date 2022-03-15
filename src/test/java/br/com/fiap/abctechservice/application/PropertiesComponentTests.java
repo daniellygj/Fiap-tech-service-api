@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(classes={br.com.fiap.abctechservice.application.PropertiesComponent.class})
+@SpringBootTest()
 public class PropertiesComponentTests {
 
     private PropertiesComponent propertiesComponent;
