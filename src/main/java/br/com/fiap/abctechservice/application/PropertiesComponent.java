@@ -11,7 +11,7 @@ public class PropertiesComponent {
 
     private Properties properties;
 
-    public String getVersionAndName() {
+    public PropertiesComponent() {
         properties = new Properties();
         InputStream inputStream =  getClass().getClassLoader().getResourceAsStream("application.yml");
         try {
@@ -19,7 +19,9 @@ public class PropertiesComponent {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    public String getVersionAndName() {
         return properties.getProperty("build.name") + " - " + properties.getProperty("build.version");
     }
 
