@@ -32,9 +32,12 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order createOrder(Order order) {
+        // todo se nao tiver data de inicio, throw exception
+        // todo nao deixar salvar EndOrderLocation
+
         List<Assistance> assistanceList = new ArrayList<>();
 
-        int servicesQty = order.getServices().size();
+        int servicesQty = order.getServices() != null ? order.getServices().size() : 0;
 
         if (servicesQty < 1) {
             throw new OrderException.MinOrderAssistsException();
@@ -43,15 +46,11 @@ public class OrderServiceImpl implements OrderService {
         }
 
         order.getServices().forEach(assistance -> {
-            try {
-                Assistance assistanceFound = assistanceService.getAssist(assistance.getId());
+        Assistance assistanceFound = assistanceService.getAssist(assistance.getId());
 
-                if (!assistanceList.contains(assistanceFound)) {
-                    assistanceList.add(assistanceFound);
-                }
-            } catch (Exception.NotFoundException e) {
-                e.printStackTrace();
-            }
+        if (!assistanceList.contains(assistanceFound)) {
+            assistanceList.add(assistanceFound);
+        }
 
         });
 
@@ -62,6 +61,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order closeOrder(Order order) {
+        // todo verificar se a ordem ja não foi fechada ?
+        // todo estourar erro se a ordem não existir
+        // todo não esquecer dos testes quando fizer as alterações
         Order orderSaved = orderRepository.getById(order.getId());
 
         order.setEndOrderLocation(order.getEndOrderLocation());

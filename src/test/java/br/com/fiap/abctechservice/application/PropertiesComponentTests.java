@@ -17,17 +17,17 @@ public class PropertiesComponentTests {
 
     @Test
     void getVersionShouldSucceed() {
-        Assertions.assertNotNull(propertiesComponent.getVersion());
+        Assertions.assertTrue(propertiesComponent.getVersion().contains("1.0"));
     }
 
     @Test
     void getNameShouldSucceed() {
-        Assertions.assertNotNull(propertiesComponent.getName());
+        Assertions.assertEquals(propertiesComponent.getName(), "abc-tech-service");
     }
 
     @Test
     void getNameAndVersionShouldSucceed() {
-        Assertions.assertTrue(propertiesComponent.getVersionAndName().contains(propertiesComponent.getName()));
-        Assertions.assertTrue(propertiesComponent.getVersionAndName().contains(propertiesComponent.getVersion()));
+        Assertions.assertTrue(propertiesComponent.getVersionAndName().contains("1.0"));
+        Assertions.assertTrue(propertiesComponent.getVersionAndName().contains("abc-tech-service"));
     }
 }
