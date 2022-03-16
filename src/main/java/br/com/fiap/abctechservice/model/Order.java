@@ -25,11 +25,11 @@ public class Order {
     @ManyToMany
     private List<Assistance> services;
 
-    @OneToOne
+    @OneToOne(cascade=CascadeType.PERSIST)
     @JoinColumn(name = "start_order_location_id")
     private OrderLocation startOrderLocation;
 
-    @OneToOne
+    @OneToOne(cascade=CascadeType.PERSIST)
     @JoinColumn(name = "end_order_location_id")
     private OrderLocation endOrderLocation;
 }
