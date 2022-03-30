@@ -1,6 +1,7 @@
 package br.com.fiap.abctechservice.service;
 
 import br.com.fiap.abctechservice.model.Assistance;
+import br.com.fiap.abctechservice.model.AssistanceTestBuilder;
 import br.com.fiap.abctechservice.repository.AssistanceRepository;
 import br.com.fiap.abctechservice.service.impl.AssistanceServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -32,21 +33,30 @@ public class AssistanceServiceTest {
     }
 
     @Test
-    public void listWithDataAssistanceShouldSucceed() {
-        Assistance itemAssist = new Assistance(1L, "Mock name", "Mock description");
-        Assistance itemAssist2 = new Assistance(2L, "Mock name 2", "Mock description 2");
+    public void listWithDataAssistance_ShouldSucceed() {
+        Assistance itemAssist1 = AssistanceTestBuilder
+                .init()
+                .withDefaultValues()
+                .build();
 
-        when(assistanceRepository.findAll()).thenReturn(List.of(itemAssist, itemAssist2));
+        Assistance itemAssist2 = AssistanceTestBuilder
+                .init()
+                .withDefaultValues()
+                .id(2L)
+                .build();
+
+
+        when(assistanceRepository.findAll()).thenReturn(List.of(itemAssist1, itemAssist2));
 
         List<Assistance> values = assistanceService.getAssistsList();
 
         assertEquals(values.size(), 2);
-        assertSame(values.get(0), itemAssist);
+        assertSame(values.get(0), itemAssist1);
         assertSame(values.get(1), itemAssist2);
     }
 
     @Test
-    public void listWithNoDataAssistanceShouldSucceed() {
+    public void listWithNoDataAssistance_ShouldSucceed() {
 
         when(assistanceRepository.findAll()).thenReturn(List.of());
 
