@@ -19,6 +19,4 @@ public class ErrorMessageResponse {
 
     private String message;
 
-    private String description;
-
 }

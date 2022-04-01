@@ -73,7 +73,6 @@ public class OrderServiceTest {
         Order orderSaved = mapper.map(orderSavedDto, Order.class);
 
         assertEquals(orderSaved.getServices(), Collections.singletonList(assistanceFound));
-//        assertEquals(orderSaved.getStartOrderLocation(), startOrderLocation); todo
         assertNull(orderSaved.getEndOrderLocation());
         assertEquals(orderSaved.getOperatorId(), order.getOperatorId());
     }

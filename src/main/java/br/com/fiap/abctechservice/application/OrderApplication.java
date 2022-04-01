@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface OrderApplication {
 
-    OrderDto createOrder(OrderDto orderDto); // todo
+    OrderDto createOrder(OrderDto orderDto);
 
     OrderDto closeOrder(OrderDto orderDto);
 
