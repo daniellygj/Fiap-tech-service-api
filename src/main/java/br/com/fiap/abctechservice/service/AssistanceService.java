@@ -10,5 +10,4 @@ public interface AssistanceService {
     List<Assistance> getAssistsList();
 
     Assistance getAssist(Long id);
-
 }
