@@ -1,16 +1,17 @@
 package br.com.fiap.abctechservice.service.impl;
 
+import br.com.fiap.abctechservice.application.dto.OrderDto;
 import br.com.fiap.abctechservice.model.Assistance;
 import br.com.fiap.abctechservice.model.Order;
 import br.com.fiap.abctechservice.repository.OrderRepository;
 import br.com.fiap.abctechservice.service.AssistanceService;
 import br.com.fiap.abctechservice.service.OrderService;
-import br.com.fiap.abctechservice.utils.exception.Exception;
-import br.com.fiap.abctechservice.utils.exception.OrderException;
+import br.com.fiap.abctechservice.handler.exception.GenericException;
+import br.com.fiap.abctechservice.handler.exception.OrderException;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,6 +21,9 @@ import java.util.List;
 public class OrderServiceImpl implements OrderService {
 
     Logger logger = LoggerFactory.getLogger(OrderService.class);
+
+    ModelMapper mapper = new ModelMapper();
+
 
     private final OrderRepository orderRepository;
 
@@ -31,7 +35,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order createOrder(Order order) {
+    public OrderDto createOrder(Order order, List<Long> arrayAssists) {
         // todo se nao tiver data de inicio, throw exception
         // todo nao deixar salvar EndOrderLocation
 
@@ -45,18 +49,17 @@ public class OrderServiceImpl implements OrderService {
             throw new OrderException.MaxOrderAssistsException();
         }
 
-        order.getServices().forEach(assistance -> {
-        Assistance assistanceFound = assistanceService.getAssist(assistance.getId());
+        arrayAssists.forEach(id -> {
+            Assistance assistanceFound = assistanceService.getAssist(id);
 
-        if (!assistanceList.contains(assistanceFound)) {
-            assistanceList.add(assistanceFound);
-        }
-
+            if (!assistanceList.contains(assistanceFound) && assistanceFound != null) {
+                assistanceList.add(assistanceFound);
+            }
         });
 
         order.setServices(assistanceList);
-
-        return orderRepository.save(order);
+        Order orderSaved = orderRepository.save(order);
+        return mapper.map(orderSaved, OrderDto.class);
     }
 
     @Override
@@ -78,6 +81,6 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order getOrder(Long id) {
-        return orderRepository.findById(id).orElseThrow(() -> new Exception.NotFoundException("Order"));
+        return orderRepository.findById(id).orElseThrow(() -> new GenericException.NotFoundException("Order"));
     }
 }

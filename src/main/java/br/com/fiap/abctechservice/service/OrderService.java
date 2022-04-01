@@ -1,5 +1,6 @@
 package br.com.fiap.abctechservice.service;
 
+import br.com.fiap.abctechservice.application.dto.OrderDto;
 import br.com.fiap.abctechservice.model.Order;
 import org.springframework.data.crossstore.ChangeSetPersister;
 
@@ -7,7 +8,7 @@ import java.util.List;
 
 public interface OrderService {
 
-    Order createOrder(Order order);
+    OrderDto createOrder(Order order, List<Long> arrayAssists);
 
     Order closeOrder(Order order);
 
