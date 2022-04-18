@@ -1,7 +1,7 @@
 version: "3"
 services:
   mysql:
-    image: mysql:5.7
+    image: mysql:8.0
     container_name: mysql
     expose:
       - 3306
@@ -10,4 +10,4 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_PASSWORD=root
-      - MYSQL_DATABASE=antenas
+      - MYSQL_DATABASE=abc_tech
