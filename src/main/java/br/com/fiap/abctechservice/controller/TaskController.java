@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/service")
+@RequestMapping("/task")
 public class TaskController {
 
     private final TaskService service;
@@ -21,8 +21,7 @@ public class TaskController {
         this.service = service;
     }
 
-
-    @GetMapping("{orderId}")
+    @GetMapping("by-order/{orderId}")
     public ResponseEntity<List<TaskDto>> getTask(@PathVariable("orderId") Long orderId) {
         List<TaskDto> list = service.getTasksByOrder(orderId);
         return ResponseEntity.ok(list);

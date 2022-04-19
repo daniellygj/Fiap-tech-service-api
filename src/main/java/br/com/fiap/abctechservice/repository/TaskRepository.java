@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
-    @Query("SELECT t FROM Orders o JOIN o.tasks t WHERE :orderId IN t")
+    @Query("SELECT t FROM Orders o JOIN o.tasks t WHERE :orderId = o.id")
     List<Task> findAllByOrderId(Long orderId);
 }
