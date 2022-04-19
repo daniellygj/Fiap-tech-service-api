@@ -1,18 +1,21 @@
 package br.com.fiap.abctechservice.service;
 
-import br.com.fiap.abctechservice.application.dto.OrderDto;
+import br.com.fiap.abctechservice.dto.OrderDto;
+import br.com.fiap.abctechservice.dto.TaskDto;
+import br.com.fiap.abctechservice.handler.exception.NotFoundException;
+import br.com.fiap.abctechservice.handler.exception.OrderException;
 import br.com.fiap.abctechservice.model.*;
 import br.com.fiap.abctechservice.repository.OrderRepository;
 import br.com.fiap.abctechservice.service.impl.OrderServiceImpl;
-import br.com.fiap.abctechservice.handler.exception.GenericException;
-import br.com.fiap.abctechservice.handler.exception.OrderException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,29 +31,28 @@ public class OrderServiceTest {
     private OrderRepository orderRepository;
 
     @Mock
-    private AssistanceService assistanceService;
+    private TaskService serviceService;
+
+    @Mock
+    private ModelMapper modelMapper;
 
     private OrderService orderService;
 
-    private ModelMapper mapper = new ModelMapper();
+    private final ModelMapper mapper = new ModelMapper();
 
     @BeforeEach
     public void init() {
         MockitoAnnotations.openMocks(this);
-        orderService = new OrderServiceImpl(orderRepository, assistanceService);
+        orderService = new OrderServiceImpl(modelMapper, orderRepository, serviceService);
     }
 
     @Test
     public void createOrder_ShouldSucceed() {
-        Assistance assistanceFound = AssistanceTestBuilder
-                .init()
-                .withDefaultValues()
+        Task task = Task
+                .builder()
                 .build();
 
-        Assistance assistance = Assistance
-                .builder()
-                .id(assistanceFound.getId())
-                .build();
+        TaskDto taskFound = mapper.map(task, TaskDto.class);
 
         OrderLocation startOrderLocation = OrderLocationTestbuilder
                 .init()
@@ -60,25 +62,29 @@ public class OrderServiceTest {
         Order order = OrderTestBuilder
                 .init()
                 .withDefaultValues()
-                .services(Collections.singletonList(assistance))
+                .tasks(Collections.singletonList(task))
                 .startOrderLocation(startOrderLocation)
                 .build();
 
-        when(assistanceService.getAssist(assistance.getId())).thenReturn(assistanceFound);
+        OrderDto orderDto = mapper.map(order, OrderDto.class);
+
+        when(serviceService.getTaskById(task.getId())).thenReturn(taskFound);
         when(orderRepository.save(order)).thenReturn(order);
+        when(modelMapper.map(orderDto, Order.class)).thenReturn(order);
+        when(modelMapper.map(order, OrderDto.class)).thenReturn(orderDto);
 
-        List<Long> idList =  generateMockAssistance(3);
+        OrderDto orderSavedDto = orderService.createOrder(orderDto);
 
-        OrderDto orderSavedDto = orderService.createOrder(order, idList);
-        Order orderSaved = mapper.map(orderSavedDto, Order.class);
-
-        assertEquals(orderSaved.getServices(), Collections.singletonList(assistanceFound));
-        assertNull(orderSaved.getEndOrderLocation());
-        assertEquals(orderSaved.getOperatorId(), order.getOperatorId());
+        assertEquals(orderSavedDto.getTasks().get(0).getId(), taskFound.getId());
+        assertEquals(orderSavedDto.getTasks().get(0).getName(), taskFound.getName());
+        assertEquals(orderSavedDto.getTasks().get(0).getDescription(), taskFound.getDescription());
+        assertNotNull(orderSavedDto.getStartOrderLocation());
+        assertNull(orderSavedDto.getEndOrderLocation());
+        assertEquals(orderSavedDto.getOperatorId(), order.getOperatorId());
     }
 
     @Test
-    public void createOrderWithNoAssists_ShouldFail() {
+    public void createOrderWithNoService_ShouldFail() {
         OrderLocation startOrderLocation = OrderLocationTestbuilder
                 .init()
                 .withDefaultValues()
@@ -90,64 +96,43 @@ public class OrderServiceTest {
                 .startOrderLocation(startOrderLocation)
                 .build();
 
+        OrderDto orderDto = mapper.map(order, OrderDto.class);
+        when(modelMapper.map(orderDto, Order.class)).thenReturn(order);
+
         assertThrows(
-                OrderException.MinOrderAssistsException.class,
-                () -> orderService.createOrder(order, List.of())
+                OrderException.MinOrderTaskException.class,
+                () -> orderService.createOrder(orderDto)
         );
     }
 
-//    @Test
-//    public void createOrderWithMaxAssists_ShouldFail() {
-//        OrderLocation startOrderLocation = OrderLocationTestbuilder
-//                .init()
-//                .withDefaultValues()
-//                .build();
-//
-//        Order order = OrderTestBuilder
-//                .init()
-//                .withDefaultValues()
-//                .startOrderLocation(startOrderLocation)
-//                .build();
-//
-//        List<Long> idList =  generateMockAssistance(17);
-//
-//        assertThrows(
-//                OrderException.MaxOrderAssistsException.class,
-//                () -> orderService.createOrder(order, idList)
-//        );
-//    }
+    @Test
+    public void createOrderWithMaxService_ShouldFail() {
+        List<Task> tasks = generateMockTask(16);
 
-//    @Test
-//    public void createOrderWithNonExistingAssistance_ShouldFail() {
-//
-//        Assistance assistance = Assistance
-//                .builder()
-//                .id(1L)
-//                .build();
-//
-//        OrderLocation startOrderLocation = OrderLocationTestbuilder
-//                .init()
-//                .withDefaultValues()
-//                .build();
-//
-//        Order order = OrderTestBuilder
-//                .init()
-//                .withDefaultValues()
-//                .services(Collections.singletonList(assistance))
-//                .startOrderLocation(startOrderLocation)
-//                .build();
-//
-//        when(assistanceService.getAssist(assistance.getId())).thenThrow(Exception.NotFoundException.class);
-//
-//        assertThrows(
-//                Exception.NotFoundException.class,
-//                () -> orderService.createOrder(order, List.of())
-//        );
-//    }
+        OrderLocation startOrderLocation = OrderLocationTestbuilder
+                .init()
+                .withDefaultValues()
+                .build();
+
+        Order order = OrderTestBuilder
+                .init()
+                .withDefaultValues()
+                .startOrderLocation(startOrderLocation)
+                .tasks(tasks)
+                .build();
+
+        OrderDto orderDto = mapper.map(order, OrderDto.class);
+        when(modelMapper.map(orderDto, Order.class)).thenReturn(order);
+
+        assertThrows(
+                OrderException.MaxOrderTaskException.class,
+                () -> orderService.createOrder(orderDto)
+        );
+    }
 
     @Test
     public void closeOrder_shouldSucceed() {
-        Assistance assistance = AssistanceTestBuilder
+        Task task = TaskTestBuilder
                 .init()
                 .withDefaultValues()
                 .build();
@@ -161,26 +146,29 @@ public class OrderServiceTest {
         Order orderSaved = OrderTestBuilder
                 .init()
                 .withDefaultValues()
-                .services(Collections.singletonList(assistance))
+                .tasks(Collections.singletonList(task))
                 .startOrderLocation(orderLocation)
                 .build();
 
         Order order = OrderTestBuilder
                 .init()
                 .withDefaultValues()
-                .services(Collections.singletonList(assistance))
+                .tasks(Collections.singletonList(task))
                 .startOrderLocation(orderLocation)
                 .endOrderLocation(orderLocation)
                 .build();
 
+        OrderDto orderDto = mapper.map(order, OrderDto.class);
+
         when(orderRepository.getById(order.getId())).thenReturn(orderSaved);
         when(orderRepository.save(orderSaved)).thenReturn(orderSaved);
+        when(modelMapper.map(orderSaved, OrderDto.class)).thenReturn(orderDto);
 
-        Order orderReturned = orderService.closeOrder(order);
+        OrderDto orderReturned = orderService.closeOrder(orderDto);
 
-        assertEquals(orderReturned.getEndOrderLocation(), orderReturned.getEndOrderLocation());
-        assertEquals(orderReturned.getStartOrderLocation(), order.getStartOrderLocation());
-        assertEquals(orderReturned.getServices(), order.getServices());
+        assertEquals(orderReturned.getStartOrderLocation(), orderDto.getStartOrderLocation());
+        assertEquals(orderReturned.getEndOrderLocation(), orderDto.getEndOrderLocation());
+        assertEquals(orderReturned.getTasks(), orderDto.getTasks());
         assertEquals(orderReturned.getOperatorId(), order.getOperatorId());
     }
 
@@ -204,21 +192,31 @@ public class OrderServiceTest {
                 .id(3L)
                 .build();
 
-        when(orderRepository.findAll()).thenReturn(List.of(order1, order2, order3));
+        Type listType = new TypeToken<List<OrderDto>>(){}.getType();
+        List<Order> orders = List.of(order1, order2, order3);
+        List<OrderDto> ordersDto = mapper.map(orders, listType);
 
-        List<Order> orderList = orderService.listOrders();
+        when(orderRepository.findAll()).thenReturn(orders);
+        when(modelMapper.map(orders, listType)).thenReturn(ordersDto);
+
+        List<OrderDto> orderList = orderService.listOrders();
 
         assertEquals(orderList.size(), 3);
-        assertTrue(orderList.contains(order1));
-        assertTrue(orderList.contains(order2));
-        assertTrue(orderList.contains(order3));
+        assertTrue(orderList.contains(ordersDto.get(0)));
+        assertTrue(orderList.contains(ordersDto.get(1)));
+        assertTrue(orderList.contains(ordersDto.get(2)));
     }
 
     @Test
     public void listOrderWithNoOrdersSaved_shouldSucceed() {
-        when(orderRepository.findAll()).thenReturn(List.of());
 
-        List<Order> orderList = orderService.listOrders();
+        Type listType = new TypeToken<List<OrderDto>>(){}.getType();
+        List<Order> orders = List.of();
+
+        when(orderRepository.findAll()).thenReturn(List.of());
+        when(modelMapper.map(orders, listType)).thenReturn(List.of());
+
+        List<OrderDto> orderList = orderService.listOrders();
 
         assertEquals(orderList.size(), 0);
     }
@@ -231,10 +229,12 @@ public class OrderServiceTest {
                 .build();
 
         Optional<Order> orderOptional = Optional.ofNullable(order);
+        OrderDto orderDto = mapper.map(order, OrderDto.class);
 
         when(orderRepository.findById(order.getId())).thenReturn(orderOptional);
+        when(modelMapper.map(order, OrderDto.class)).thenReturn(orderDto);
 
-        Order orderFound = orderService.getOrder(order.getId());
+        OrderDto orderFound = orderService.getOrder(order.getId());
 
         assertEquals(orderFound.getOperatorId(), order.getOperatorId());
     }
@@ -242,19 +242,26 @@ public class OrderServiceTest {
     @Test
     public void getOrder_shouldFail() {
 
-        when(orderRepository.findById(1L)).thenThrow(GenericException.NotFoundException.class);;
+        when(orderRepository.findById(1L)).thenThrow(NotFoundException.class);;
 
         assertThrows(
-                GenericException.NotFoundException.class,
+                NotFoundException.class,
                 () -> orderService.getOrder(1L)
         );
     }
 
-    private List<Long> generateMockAssistance(int number) {
-        ArrayList<Long> list = new ArrayList<>();
+    // todo - corrigir pra criar objeto
+    private List<Task> generateMockTask(int number) {
+        ArrayList<Task> list = new ArrayList<>();
 
         for (int j = 0; j < number; j++) {
-            list.add(Integer.toUnsignedLong(j));
+            Task task = TaskTestBuilder
+                    .init()
+                    .withDefaultValues()
+                    .id((long) j)
+                    .build();
+
+            list.add(task);
         }
 
         return list;

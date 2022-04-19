@@ -1,13 +1,10 @@
-package br.com.fiap.abctechservice.application.dto;
+package br.com.fiap.abctechservice.dto;
 
-import br.com.fiap.abctechservice.model.Assistance;
-import br.com.fiap.abctechservice.model.OrderLocation;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.*;
 
-import javax.persistence.CascadeType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToOne;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -18,6 +15,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(Include.NON_NULL)
 public class OrderDto {
 
     private Long id;
@@ -28,10 +26,9 @@ public class OrderDto {
 
     @NotEmpty
     @NotNull
-    private List<Assistance> services;
+    private List<TaskDto> tasks;
 
     private OrderLocationDto startOrderLocation;
 
     private OrderLocationDto endOrderLocation;
-
 }

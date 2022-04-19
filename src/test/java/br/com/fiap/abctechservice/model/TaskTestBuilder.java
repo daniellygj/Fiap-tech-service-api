@@ -1,24 +1,23 @@
 package br.com.fiap.abctechservice.model;
 
-import br.com.fiap.abctechservice.model.Assistance.AssistanceBuilder;
+import br.com.fiap.abctechservice.model.Task.TaskBuilder;
 
-public class AssistanceTestBuilder {
+public class TaskTestBuilder {
 
     private static final long ID = 1;
     private static final String NAME = "Mocked name";
     private static final String DESCRIPTION = "Mocked description";
 
-    private  AssistanceBuilder builder = Assistance.builder();
+    private  TaskBuilder builder = Task.builder();
 
-    public static AssistanceTestBuilder init() {
-        return new AssistanceTestBuilder();
+    public static TaskTestBuilder init() {
+        return new TaskTestBuilder();
     }
 
-    public AssistanceBuilder withDefaultValues() {
+    public TaskBuilder withDefaultValues() {
         return builder
                 .id(ID)
                 .name(NAME)
                 .description(DESCRIPTION);
     }
-
 }

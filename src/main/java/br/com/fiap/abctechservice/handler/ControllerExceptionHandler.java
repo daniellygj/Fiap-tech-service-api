@@ -1,8 +1,8 @@
-package br.com.fiap.abctechservice.handler;
+package br.com.fiap.abctechService.handler;
 
 
 import br.com.fiap.abctechservice.handler.exception.ErrorMessageResponse;
-import br.com.fiap.abctechservice.handler.exception.GenericException;
+import br.com.fiap.abctechservice.handler.exception.NotFoundException;
 import br.com.fiap.abctechservice.handler.exception.OrderException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,15 +11,14 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.util.Arrays;
 import java.util.Date;
 
 @ControllerAdvice
 public class ControllerExceptionHandler {
 
 
-    @ExceptionHandler(OrderException.MinOrderAssistsException.class)
-    public ResponseEntity<ErrorMessageResponse> errorMinAssistRequired(OrderException.MinOrderAssistsException ex) {
+    @ExceptionHandler(OrderException.MinOrderTaskException.class)
+    public ResponseEntity<ErrorMessageResponse> errorMinTasksRequired(OrderException.MinOrderTaskException ex) {
         ErrorMessageResponse error = new ErrorMessageResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 new Date(),
@@ -28,8 +27,8 @@ public class ControllerExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(OrderException.MaxOrderAssistsException.class)
-    public ResponseEntity<ErrorMessageResponse> errorMaxAssistException(OrderException.MaxOrderAssistsException ex) {
+    @ExceptionHandler(OrderException.MaxOrderTaskException.class)
+    public ResponseEntity<ErrorMessageResponse> errorMaxTasksException(OrderException.MaxOrderTaskException ex) {
         ErrorMessageResponse error = new ErrorMessageResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 new Date(),
@@ -63,8 +62,8 @@ public class ControllerExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(GenericException.NotFoundException.class)
-    public ResponseEntity<ErrorMessageResponse> errorNotFoundException(GenericException.NotFoundException ex) {
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorMessageResponse> errorNotFoundException(NotFoundException ex) {
         ErrorMessageResponse error = new ErrorMessageResponse(
                 HttpStatus.NOT_FOUND.value(),
                 new Date(),

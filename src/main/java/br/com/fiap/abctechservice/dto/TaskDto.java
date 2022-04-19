@@ -1,5 +1,6 @@
-package br.com.fiap.abctechservice.application.dto;
+package br.com.fiap.abctechservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,12 +10,12 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AssistDto {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class TaskDto {
 
     private Long id;
 
     private String name;
 
     private String description;
-
 }

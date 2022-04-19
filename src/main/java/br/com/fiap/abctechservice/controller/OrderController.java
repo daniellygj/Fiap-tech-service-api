@@ -1,9 +1,7 @@
 package br.com.fiap.abctechservice.controller;
 
-import br.com.fiap.abctechservice.application.OrderApplication;
-import br.com.fiap.abctechservice.application.dto.OrderDto;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import br.com.fiap.abctechservice.dto.OrderDto;
+import br.com.fiap.abctechservice.service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,31 +12,30 @@ import java.util.List;
 @RequestMapping("/order")
 public class OrderController {
 
-    private final OrderApplication orderApplication;
+    private final OrderService service;
 
-    ModelMapper mapper = new ModelMapper();
-
-    public OrderController(@Autowired OrderApplication orderApplication) {
-        this.orderApplication = orderApplication;
+    public OrderController(OrderService service) {
+        this.service = service;
     }
+
 
     @PostMapping
     public ResponseEntity<OrderDto> createOrder(@RequestBody @Valid OrderDto orderDto) {
-        return ResponseEntity.ok(orderApplication.createOrder(orderDto));
+        return ResponseEntity.ok(service.createOrder(orderDto));
     }
 
     @PutMapping
     public ResponseEntity<OrderDto> closeOrder(@RequestBody @Valid OrderDto order) {
-        return ResponseEntity.ok(orderApplication.closeOrder(order));
+        return ResponseEntity.ok(service.closeOrder(order));
     }
 
     @GetMapping
     public ResponseEntity<List<OrderDto>> getOrders() {
-        return ResponseEntity.ok(orderApplication.listOrders());
+        return ResponseEntity.ok(service.listOrders());
     }
 
     @GetMapping("{id}")
     public ResponseEntity<OrderDto> getOrderById(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(orderApplication.getOrder(id));
+        return ResponseEntity.ok(service.getOrder(id));
     }
 }

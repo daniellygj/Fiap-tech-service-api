@@ -6,12 +6,12 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "orders")
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "orders")
 public class Order {
 
     @Id
@@ -20,8 +20,12 @@ public class Order {
 
     private Long operatorId;
 
-    @ManyToMany
-    private List<Assistance> services;
+    @OneToMany(cascade=CascadeType.PERSIST)
+    @JoinTable(
+            name = "order_task",
+            joinColumns = @JoinColumn(name = "order_id"),
+            inverseJoinColumns = @JoinColumn(name = "task_id"))
+    private List<Task> tasks;
 
     @OneToOne(cascade=CascadeType.PERSIST)
     @JoinColumn(name = "start_order_location_id")

@@ -3,15 +3,15 @@ package br.com.fiap.abctechservice.model;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
-@Table(name = "assistances")
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Assistance {
+public class Task {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,4 +22,7 @@ public class Assistance {
 
     @Column(nullable = false, length = 1000)
     private String description;
+
+    @ManyToOne
+    private Order order;
 }

@@ -1,18 +1,16 @@
 package br.com.fiap.abctechservice.service;
 
-import br.com.fiap.abctechservice.application.dto.OrderDto;
-import br.com.fiap.abctechservice.model.Order;
-import org.springframework.data.crossstore.ChangeSetPersister;
+import br.com.fiap.abctechservice.dto.OrderDto;
 
 import java.util.List;
 
 public interface OrderService {
 
-    OrderDto createOrder(Order order, List<Long> arrayAssists);
+    OrderDto createOrder(OrderDto order);
 
-    Order closeOrder(Order order);
+    OrderDto closeOrder(OrderDto order);
 
-    List<Order> listOrders();
+    List<OrderDto> listOrders();
 
-    Order getOrder(Long id) ;
+    OrderDto getOrder(Long id) ;
 }

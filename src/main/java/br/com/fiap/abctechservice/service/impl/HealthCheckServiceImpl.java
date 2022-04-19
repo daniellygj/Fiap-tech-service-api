@@ -1,17 +1,17 @@
-package br.com.fiap.abctechservice.application;
+package br.com.fiap.abctechservice.service.impl;
 
-import org.springframework.stereotype.Component;
+import br.com.fiap.abctechservice.service.HealthCheckService;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-@Component
-public class PropertiesComponent {
-
+@Service
+public class HealthCheckServiceImpl implements HealthCheckService {
     private Properties properties;
 
-    public PropertiesComponent() {
+    public HealthCheckServiceImpl() {
         properties = new Properties();
         InputStream inputStream =  getClass().getClassLoader().getResourceAsStream("application.yml");
         try {
@@ -32,5 +32,4 @@ public class PropertiesComponent {
     public String getVersion() {
         return properties.getProperty("build.version");
     }
-
 }

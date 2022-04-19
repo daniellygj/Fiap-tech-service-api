@@ -1,7 +1,8 @@
 package br.com.fiap.abctechservice.model;
 
-import java.sql.Date;
 import br.com.fiap.abctechservice.model.OrderLocation.OrderLocationBuilder;
+
+import java.sql.Date;
 
 public class OrderLocationTestbuilder {
 
