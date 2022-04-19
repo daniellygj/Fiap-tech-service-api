@@ -1,6 +1,7 @@
 package br.com.fiap.abctechservice.controller;
 
 import br.com.fiap.abctechservice.dto.OrderDto;
+import br.com.fiap.abctechservice.dto.OrderDtoCreate;
 import br.com.fiap.abctechservice.service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class OrderController {
 
 
     @PostMapping
-    public ResponseEntity<OrderDto> createOrder(@RequestBody @Valid OrderDto orderDto) {
+    public ResponseEntity<OrderDto> createOrder(@RequestBody @Valid OrderDtoCreate orderDto) {
         return ResponseEntity.ok(service.createOrder(orderDto));
     }
 

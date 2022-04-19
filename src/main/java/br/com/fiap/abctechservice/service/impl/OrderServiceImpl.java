@@ -1,9 +1,11 @@
 package br.com.fiap.abctechservice.service.impl;
 
 import br.com.fiap.abctechservice.dto.OrderDto;
+import br.com.fiap.abctechservice.dto.OrderDtoCreate;
+import br.com.fiap.abctechservice.dto.TaskDto;
 import br.com.fiap.abctechservice.handler.exception.NotFoundException;
 import br.com.fiap.abctechservice.handler.exception.OrderException;
-import br.com.fiap.abctechservice.model.Order;
+import br.com.fiap.abctechservice.model.Orders;
 import br.com.fiap.abctechservice.model.Task;
 import br.com.fiap.abctechservice.repository.OrderRepository;
 import br.com.fiap.abctechservice.service.OrderService;
@@ -32,12 +34,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDto createOrder(OrderDto orderDto) {
+    public OrderDto createOrder(OrderDtoCreate orderDto) {
         // todo se nao tiver data de inicio, throw exception
         orderDto.setEndOrderLocation(null);
-        Order order = mapper.map(orderDto, Order.class);
 
-        int servicesQty = order.getTasks() != null ? order.getTasks().size() : 0;
+        int servicesQty = orderDto.getTasks() != null ? orderDto.getTasks().size() : 0;
 
         if (servicesQty < 1) {
             throw new OrderException.MinOrderTaskException();
@@ -45,30 +46,43 @@ public class OrderServiceImpl implements OrderService {
             throw new OrderException.MaxOrderTaskException();
         }
 
-        Order orderSaved = orderRepository.save(order);
-        return mapper.map(orderSaved, OrderDto.class);
+        List<Task> taskList = new ArrayList<>();
+
+        orderDto.getTasks().forEach(taskId -> {
+            TaskDto taskDto = taskService.getTaskById(taskId);
+            Task task = mapper.map(taskDto, Task.class);
+            if (!taskList.contains(task)) {
+                taskList.add(task);
+            }
+        });
+
+        Orders orders = mapper.map(orderDto, Orders.class);
+        orders.setTasks(taskList);
+
+        Orders ordersSaved = orderRepository.save(orders);
+        return mapper.map(ordersSaved, OrderDto.class);
     }
 
     @Override
     public OrderDto closeOrder(OrderDto order) {
         // todo verificar se a ordem ja não foi fechada. Se ja foi, extourar exception
         // todo estourar erro se a ordem não existir (parecido com o createOrder)
-        Order orderFound = orderRepository.getById(order.getId());
+        Orders ordersFound = orderRepository.getById(order.getId());
         order.setEndOrderLocation(order.getEndOrderLocation());
-        Order orderSaved = orderRepository.save(orderFound);
-        return mapper.map(orderSaved, OrderDto.class);
+        Orders ordersSaved = orderRepository.save(ordersFound);
+        return mapper.map(ordersSaved, OrderDto.class);
     }
 
     @Override
     public List<OrderDto> listOrders() {
-        List<Order> orders = orderRepository.findAll();
+        List<Orders> orders = orderRepository.findAll();
         Type listType = new TypeToken<List<OrderDto>>(){}.getType();
         return mapper.map(orders, listType);
     }
 
     @Override
     public OrderDto getOrder(Long id) {
-        Order orderFound = orderRepository.findById(id).orElseThrow(() -> new NotFoundException("Order", id));
-        return mapper.map(orderFound, OrderDto.class);
+        Orders ordersFound = orderRepository.findById(id).orElseThrow(() -> new NotFoundException("Order", id));
+        return mapper.map(ordersFound, OrderDto.class);
     }
 }

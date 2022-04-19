@@ -1,8 +1,6 @@
 package br.com.fiap.abctechservice.service;
 
-import br.com.fiap.abctechservice.dto.OrderDto;
 import br.com.fiap.abctechservice.dto.TaskDto;
-import br.com.fiap.abctechservice.model.Order;
 import br.com.fiap.abctechservice.model.Task;
 import br.com.fiap.abctechservice.model.TaskTestBuilder;
 import br.com.fiap.abctechservice.repository.TaskRepository;

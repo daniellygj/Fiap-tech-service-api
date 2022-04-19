@@ -1,6 +1,7 @@
 package br.com.fiap.abctechservice.service;
 
 import br.com.fiap.abctechservice.dto.OrderDto;
+import br.com.fiap.abctechservice.dto.OrderDtoCreate;
 import br.com.fiap.abctechservice.dto.TaskDto;
 import br.com.fiap.abctechservice.handler.exception.NotFoundException;
 import br.com.fiap.abctechservice.handler.exception.OrderException;
@@ -25,13 +26,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
-public class OrderServiceTest {
+public class OrdersServiceTest {
 
     @Mock
     private OrderRepository orderRepository;
 
     @Mock
-    private TaskService serviceService;
+    private TaskService taskService;
 
     @Mock
     private ModelMapper modelMapper;
@@ -43,13 +44,14 @@ public class OrderServiceTest {
     @BeforeEach
     public void init() {
         MockitoAnnotations.openMocks(this);
-        orderService = new OrderServiceImpl(modelMapper, orderRepository, serviceService);
+        orderService = new OrderServiceImpl(modelMapper, orderRepository, taskService);
     }
 
     @Test
     public void createOrder_ShouldSucceed() {
-        Task task = Task
-                .builder()
+        Task task = TaskTestBuilder
+                .init()
+                .withDefaultValues()
                 .build();
 
         TaskDto taskFound = mapper.map(task, TaskDto.class);
@@ -59,28 +61,37 @@ public class OrderServiceTest {
                 .withDefaultValues()
                 .build();
 
-        Order order = OrderTestBuilder
+        Orders orders = OrderTestBuilder
                 .init()
                 .withDefaultValues()
                 .tasks(Collections.singletonList(task))
                 .startOrderLocation(startOrderLocation)
                 .build();
 
-        OrderDto orderDto = mapper.map(order, OrderDto.class);
+        List<Long> tasksId = List.of(task.getId());
 
-        when(serviceService.getTaskById(task.getId())).thenReturn(taskFound);
-        when(orderRepository.save(order)).thenReturn(order);
-        when(modelMapper.map(orderDto, Order.class)).thenReturn(order);
-        when(modelMapper.map(order, OrderDto.class)).thenReturn(orderDto);
+        OrderDto orderDto = mapper.map(orders, OrderDto.class);
+        OrderDtoCreate orderDtoCreate = OrderDtoCreate
+                .builder()
+                .id(orderDto.getId())
+                .endOrderLocation(orderDto.getEndOrderLocation())
+                .startOrderLocation(orderDto.getStartOrderLocation())
+                .tasks(tasksId)
+                .build();
 
-        OrderDto orderSavedDto = orderService.createOrder(orderDto);
+        when(taskService.getTaskById(taskFound.getId())).thenReturn(taskFound);
+        when(orderRepository.save(orders)).thenReturn(orders);
+        when(modelMapper.map(orderDtoCreate, Orders.class)).thenReturn(orders);
+        when(modelMapper.map(orders, OrderDto.class)).thenReturn(orderDto);
+
+        OrderDto orderSavedDto = orderService.createOrder(orderDtoCreate);
 
         assertEquals(orderSavedDto.getTasks().get(0).getId(), taskFound.getId());
         assertEquals(orderSavedDto.getTasks().get(0).getName(), taskFound.getName());
         assertEquals(orderSavedDto.getTasks().get(0).getDescription(), taskFound.getDescription());
         assertNotNull(orderSavedDto.getStartOrderLocation());
         assertNull(orderSavedDto.getEndOrderLocation());
-        assertEquals(orderSavedDto.getOperatorId(), order.getOperatorId());
+        assertEquals(orderSavedDto.getOperatorId(), orders.getOperatorId());
     }
 
     @Test
@@ -90,43 +101,60 @@ public class OrderServiceTest {
                 .withDefaultValues()
                 .build();
 
-        Order order = OrderTestBuilder
+        Orders orders = OrderTestBuilder
                 .init()
                 .withDefaultValues()
                 .startOrderLocation(startOrderLocation)
                 .build();
 
-        OrderDto orderDto = mapper.map(order, OrderDto.class);
-        when(modelMapper.map(orderDto, Order.class)).thenReturn(order);
+        OrderDto orderDto = mapper.map(orders, OrderDto.class);
+        OrderDtoCreate orderDtoCreate = OrderDtoCreate
+                .builder()
+                .id(orderDto.getId())
+                .endOrderLocation(orderDto.getEndOrderLocation())
+                .startOrderLocation(orderDto.getStartOrderLocation())
+                .tasks(List.of())
+                .build();
+
+        when(modelMapper.map(orderDto, Orders.class)).thenReturn(orders);
 
         assertThrows(
                 OrderException.MinOrderTaskException.class,
-                () -> orderService.createOrder(orderDto)
+                () -> orderService.createOrder(orderDtoCreate)
         );
     }
 
     @Test
     public void createOrderWithMaxService_ShouldFail() {
         List<Task> tasks = generateMockTask(16);
+        List<Long> tasksId = generateMockTaskId(16);
 
         OrderLocation startOrderLocation = OrderLocationTestbuilder
                 .init()
                 .withDefaultValues()
                 .build();
 
-        Order order = OrderTestBuilder
+        Orders orders = OrderTestBuilder
                 .init()
                 .withDefaultValues()
                 .startOrderLocation(startOrderLocation)
                 .tasks(tasks)
                 .build();
 
-        OrderDto orderDto = mapper.map(order, OrderDto.class);
-        when(modelMapper.map(orderDto, Order.class)).thenReturn(order);
+        OrderDto orderDto = mapper.map(orders, OrderDto.class);
+        OrderDtoCreate orderDtoCreate = OrderDtoCreate
+                .builder()
+                .id(orderDto.getId())
+                .endOrderLocation(orderDto.getEndOrderLocation())
+                .startOrderLocation(orderDto.getStartOrderLocation())
+                .tasks(tasksId)
+                .build();
+
+        when(modelMapper.map(orderDto, Orders.class)).thenReturn(orders);
 
         assertThrows(
                 OrderException.MaxOrderTaskException.class,
-                () -> orderService.createOrder(orderDto)
+                () -> orderService.createOrder(orderDtoCreate)
         );
     }
 
@@ -143,14 +171,14 @@ public class OrderServiceTest {
                 .build();
 
 
-        Order orderSaved = OrderTestBuilder
+        Orders ordersSaved = OrderTestBuilder
                 .init()
                 .withDefaultValues()
                 .tasks(Collections.singletonList(task))
                 .startOrderLocation(orderLocation)
                 .build();
 
-        Order order = OrderTestBuilder
+        Orders orders = OrderTestBuilder
                 .init()
                 .withDefaultValues()
                 .tasks(Collections.singletonList(task))
@@ -158,42 +186,42 @@ public class OrderServiceTest {
                 .endOrderLocation(orderLocation)
                 .build();
 
-        OrderDto orderDto = mapper.map(order, OrderDto.class);
+        OrderDto orderDto = mapper.map(orders, OrderDto.class);
 
-        when(orderRepository.getById(order.getId())).thenReturn(orderSaved);
-        when(orderRepository.save(orderSaved)).thenReturn(orderSaved);
-        when(modelMapper.map(orderSaved, OrderDto.class)).thenReturn(orderDto);
+        when(orderRepository.getById(orders.getId())).thenReturn(ordersSaved);
+        when(orderRepository.save(ordersSaved)).thenReturn(ordersSaved);
+        when(modelMapper.map(ordersSaved, OrderDto.class)).thenReturn(orderDto);
 
         OrderDto orderReturned = orderService.closeOrder(orderDto);
 
         assertEquals(orderReturned.getStartOrderLocation(), orderDto.getStartOrderLocation());
         assertEquals(orderReturned.getEndOrderLocation(), orderDto.getEndOrderLocation());
         assertEquals(orderReturned.getTasks(), orderDto.getTasks());
-        assertEquals(orderReturned.getOperatorId(), order.getOperatorId());
+        assertEquals(orderReturned.getOperatorId(), orders.getOperatorId());
     }
 
     @Test
     public void listOrderWithOrdersSaved_shouldSucceed() {
-        Order order1 = OrderTestBuilder
+        Orders orders1 = OrderTestBuilder
                 .init()
                 .withDefaultValues()
                 .id(1L)
                 .build();
 
-        Order order2 = OrderTestBuilder
+        Orders orders2 = OrderTestBuilder
                 .init()
                 .withDefaultValues()
                 .id(2L)
                 .build();
 
-        Order order3 = OrderTestBuilder
+        Orders orders3 = OrderTestBuilder
                 .init()
                 .withDefaultValues()
                 .id(3L)
                 .build();
 
         Type listType = new TypeToken<List<OrderDto>>(){}.getType();
-        List<Order> orders = List.of(order1, order2, order3);
+        List<Orders> orders = List.of(orders1, orders2, orders3);
         List<OrderDto> ordersDto = mapper.map(orders, listType);
 
         when(orderRepository.findAll()).thenReturn(orders);
@@ -211,7 +239,7 @@ public class OrderServiceTest {
     public void listOrderWithNoOrdersSaved_shouldSucceed() {
 
         Type listType = new TypeToken<List<OrderDto>>(){}.getType();
-        List<Order> orders = List.of();
+        List<Orders> orders = List.of();
 
         when(orderRepository.findAll()).thenReturn(List.of());
         when(modelMapper.map(orders, listType)).thenReturn(List.of());
@@ -223,20 +251,20 @@ public class OrderServiceTest {
 
     @Test
     public void getOrder_shouldSucceed() {
-        Order order =  OrderTestBuilder
+        Orders orders =  OrderTestBuilder
                 .init()
                 .withDefaultValues()
                 .build();
 
-        Optional<Order> orderOptional = Optional.ofNullable(order);
-        OrderDto orderDto = mapper.map(order, OrderDto.class);
+        Optional<Orders> orderOptional = Optional.ofNullable(orders);
+        OrderDto orderDto = mapper.map(orders, OrderDto.class);
 
-        when(orderRepository.findById(order.getId())).thenReturn(orderOptional);
-        when(modelMapper.map(order, OrderDto.class)).thenReturn(orderDto);
+        when(orderRepository.findById(orders.getId())).thenReturn(orderOptional);
+        when(modelMapper.map(orders, OrderDto.class)).thenReturn(orderDto);
 
-        OrderDto orderFound = orderService.getOrder(order.getId());
+        OrderDto orderFound = orderService.getOrder(orders.getId());
 
-        assertEquals(orderFound.getOperatorId(), order.getOperatorId());
+        assertEquals(orderFound.getOperatorId(), orders.getOperatorId());
     }
 
     @Test
@@ -262,6 +290,16 @@ public class OrderServiceTest {
                     .build();
 
             list.add(task);
+        }
+
+        return list;
+    }
+
+    private List<Long> generateMockTaskId(int number) {
+        ArrayList<Long> list = new ArrayList<>();
+
+        for (int j = 0; j < number; j++) {
+            list.add((long) j);
         }
 
         return list;

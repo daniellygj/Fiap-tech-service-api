@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "orders")
-public class Order {
+public class Orders {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +20,7 @@ public class Order {
 
     private Long operatorId;
 
-    @OneToMany(cascade=CascadeType.PERSIST)
+    @ManyToMany
     @JoinTable(
             name = "order_task",
             joinColumns = @JoinColumn(name = "order_id"),
