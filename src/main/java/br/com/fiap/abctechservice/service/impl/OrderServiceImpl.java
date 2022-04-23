@@ -35,8 +35,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDto createOrder(OrderDtoCreate orderDto) {
-        // todo se nao tiver data de inicio, throw exception (utilizar exemplo do createOrder(). Criar exception personalizada e adicionar tratamento de resposta no ControllerExceptionHandler())
-        // O nome da exception deve ser "StartDateCanootBeNull"
+        if (orderDto.getStartOrderLocation() == null || orderDto.getStartOrderLocation().getDate() == null) {
+            throw new OrderException.OrderStartDateNullException();
+        }
         orderDto.setEndOrderLocation(null);
 
         int servicesQty = orderDto.getTasks() != null ? orderDto.getTasks().size() : 0;
@@ -66,8 +67,12 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDto closeOrder(OrderDto order) {
-        // todo verificar se a ordem ja não foi fechada. Se ja foi, extourar exception (utilizar exemplo do createOrder(). Criar exception personalizada e adicionar tratamento de resposta no ControllerExceptionHandler())
-        // O nome da exception deve ser "OrderAlreadyClosed"
+        if (order.getStartOrderLocation() == null || order.getStartOrderLocation().getDate() == null) {
+            throw new OrderException.OrderNotStartedException(order.getId());
+        }
+        if (order.getEndOrderLocation() != null) {
+            throw new OrderException.OrderAlreadyClosedException(order.getId());
+        }
         Orders ordersFound = orderRepository.findById(order.getId()).orElseThrow(() -> new NotFoundException("Order", order.getId()));;
         order.setEndOrderLocation(order.getEndOrderLocation());
         Orders ordersSaved = orderRepository.save(ordersFound);

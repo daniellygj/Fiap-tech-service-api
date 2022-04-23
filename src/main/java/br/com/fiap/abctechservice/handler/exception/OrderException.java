@@ -18,4 +18,25 @@ public class OrderException extends Throwable {
             super("An order must have less than 15 tasks");
         }
     }
+
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    public static class OrderStartDateNullException extends RuntimeException {
+        public OrderStartDateNullException() {
+            super("The start date cannot be null");
+        }
+    }
+
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    public static class OrderAlreadyClosedException extends RuntimeException {
+        public OrderAlreadyClosedException(Long id) {
+            super("The order with id " + id + " is already closed");
+        }
+    }
+
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    public static class OrderNotStartedException extends RuntimeException {
+        public OrderNotStartedException(Long id) {
+            super("The order with id " + id + " was not started.");
+        }
+    }
 }

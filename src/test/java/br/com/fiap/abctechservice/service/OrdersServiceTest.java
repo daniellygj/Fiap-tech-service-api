@@ -95,6 +95,38 @@ public class OrdersServiceTest {
     }
 
     @Test
+    public void createOrderWithEmptyStartDate_ShouldFail() {
+        Task task = TaskTestBuilder
+                .init()
+                .withDefaultValues()
+                .build();
+
+        Orders orders = OrderTestBuilder
+                .init()
+                .withDefaultValues()
+                .tasks(Collections.singletonList(task))
+                .build();
+
+        List<Long> tasksId = List.of(task.getId());
+
+        OrderDto orderDto = mapper.map(orders, OrderDto.class);
+        OrderDtoCreate orderDtoCreate = OrderDtoCreate
+                .builder()
+                .id(orderDto.getId())
+                .endOrderLocation(orderDto.getEndOrderLocation())
+                .startOrderLocation(orderDto.getStartOrderLocation())
+                .tasks(tasksId)
+                .build();
+
+
+        assertThrows(
+                OrderException.OrderStartDateNullException.class,
+                () -> orderService.createOrder(orderDtoCreate)
+        );
+
+    }
+
+    @Test
     public void createOrderWithNoService_ShouldFail() {
         OrderLocation startOrderLocation = OrderLocationTestbuilder
                 .init()
@@ -183,12 +215,13 @@ public class OrdersServiceTest {
                 .withDefaultValues()
                 .tasks(Collections.singletonList(task))
                 .startOrderLocation(orderLocation)
-                .endOrderLocation(orderLocation)
                 .build();
 
         OrderDto orderDto = mapper.map(orders, OrderDto.class);
 
-        when(orderRepository.getById(orders.getId())).thenReturn(ordersSaved);
+        orders.setEndOrderLocation(orderLocation);
+
+        when(orderRepository.findById(orderDto.getId())).thenReturn(Optional.of(ordersSaved));
         when(orderRepository.save(ordersSaved)).thenReturn(ordersSaved);
         when(modelMapper.map(ordersSaved, OrderDto.class)).thenReturn(orderDto);
 
@@ -198,6 +231,77 @@ public class OrdersServiceTest {
         assertEquals(orderReturned.getEndOrderLocation(), orderDto.getEndOrderLocation());
         assertEquals(orderReturned.getTasks(), orderDto.getTasks());
         assertEquals(orderReturned.getOperatorId(), orders.getOperatorId());
+    }
+
+    @Test
+    public void closeOrderWithNoStartDate_shouldFail() {
+        Task task = TaskTestBuilder
+                .init()
+                .withDefaultValues()
+                .build();
+
+        Orders ordersSaved = OrderTestBuilder
+                .init()
+                .withDefaultValues()
+                .tasks(Collections.singletonList(task))
+                .build();
+
+        Orders orders = OrderTestBuilder
+                .init()
+                .withDefaultValues()
+                .tasks(Collections.singletonList(task))
+                .build();
+
+        OrderDto orderDto = mapper.map(orders, OrderDto.class);
+
+        when(orderRepository.findById(orderDto.getId())).thenReturn(Optional.of(ordersSaved));
+        when(orderRepository.save(ordersSaved)).thenReturn(ordersSaved);
+        when(modelMapper.map(ordersSaved, OrderDto.class)).thenReturn(orderDto);
+
+        assertThrows(
+                OrderException.OrderNotStartedException.class,
+                () -> orderService.closeOrder(orderDto)
+        );
+    }
+
+    @Test
+    public void closeOrderAlreadyClosed_shouldFail() {
+        Task task = TaskTestBuilder
+                .init()
+                .withDefaultValues()
+                .build();
+
+        OrderLocation orderLocation = OrderLocationTestbuilder
+                .init()
+                .withDefaultValues()
+                .build();
+
+
+        Orders ordersSaved = OrderTestBuilder
+                .init()
+                .withDefaultValues()
+                .tasks(Collections.singletonList(task))
+                .startOrderLocation(orderLocation)
+                .build();
+
+        Orders orders = OrderTestBuilder
+                .init()
+                .withDefaultValues()
+                .tasks(Collections.singletonList(task))
+                .startOrderLocation(orderLocation)
+                .endOrderLocation(orderLocation)
+                .build();
+
+        OrderDto orderDto = mapper.map(orders, OrderDto.class);
+
+        when(orderRepository.findById(orderDto.getId())).thenReturn(Optional.of(ordersSaved));
+        when(orderRepository.save(ordersSaved)).thenReturn(ordersSaved);
+        when(modelMapper.map(ordersSaved, OrderDto.class)).thenReturn(orderDto);
+
+        assertThrows(
+                OrderException.OrderAlreadyClosedException.class,
+                () -> orderService.closeOrder(orderDto)
+        );
     }
 
     @Test
