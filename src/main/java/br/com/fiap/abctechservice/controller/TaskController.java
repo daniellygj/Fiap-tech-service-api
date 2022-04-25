@@ -32,4 +32,9 @@ public class TaskController {
         return ResponseEntity.ok(service.getTaskById(id));
     }
 
+    @GetMapping()
+    public ResponseEntity<List<TaskDto>> listTasks() {
+        return ResponseEntity.ok(service.getTasks());
+    }
+
 }

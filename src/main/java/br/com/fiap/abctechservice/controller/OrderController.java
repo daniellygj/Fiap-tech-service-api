@@ -25,11 +25,6 @@ public class OrderController {
         return ResponseEntity.ok(service.createOrder(orderDto));
     }
 
-    @PutMapping
-    public ResponseEntity<OrderDto> closeOrder(@RequestBody @Valid OrderDto order) {
-        return ResponseEntity.ok(service.closeOrder(order));
-    }
-
     @GetMapping
     public ResponseEntity<List<OrderDto>> getOrders() {
         return ResponseEntity.ok(service.listOrders());

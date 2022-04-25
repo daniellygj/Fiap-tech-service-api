@@ -33,6 +33,13 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public List<TaskDto> getTasks() {
+        List<Task> tasks = repository.findAll();
+        Type listType = new TypeToken<List<TaskDto>>(){}.getType();
+        return mapper.map(tasks, listType);
+    }
+
+    @Override
     public TaskDto getTaskById(Long id) {
         Task task = repository.findById(id).orElseThrow(() -> new NotFoundException("Task", id));
         return mapper.map(task, TaskDto.class);

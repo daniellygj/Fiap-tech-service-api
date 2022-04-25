@@ -8,5 +8,7 @@ public interface TaskService {
 
     List<TaskDto> getTasksByOrder(Long orderId);
 
+    List<TaskDto> getTasks();
+
     TaskDto getTaskById(Long id);
 }

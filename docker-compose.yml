@@ -3,6 +3,7 @@ services:
   mysql:
     image: mysql:8.0
     container_name: mysql
+    network_mode: bridge
     expose:
       - 3306
     ports:
@@ -11,3 +12,22 @@ services:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_PASSWORD=root
       - MYSQL_DATABASE=abc_tech
+
+  springbootapp:
+    build: .
+    network_mode: bridge
+    container_name: abctechservice
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=abc_tech
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+    expose:
+      - 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    links:
+      - mysql

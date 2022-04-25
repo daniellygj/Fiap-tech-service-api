@@ -1,4 +1,4 @@
-package br.com.fiap.abctechService.handler;
+package br.com.fiap.abctechservice.handler;
 
 
 import br.com.fiap.abctechservice.handler.exception.ErrorMessageResponse;
@@ -66,6 +66,26 @@ public class ControllerExceptionHandler {
     public ResponseEntity<ErrorMessageResponse> errorNotFoundException(NotFoundException ex) {
         ErrorMessageResponse error = new ErrorMessageResponse(
                 HttpStatus.NOT_FOUND.value(),
+                new Date(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(OrderException.OrderNotStartedException.class)
+    public ResponseEntity<ErrorMessageResponse> errorOrderNotStartedException (OrderException.OrderNotStartedException ex) {
+        ErrorMessageResponse error = new ErrorMessageResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                new Date(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(OrderException.OrderStartDateNullException.class)
+    public ResponseEntity<ErrorMessageResponse> errorOrderStartDateNullException(OrderException.OrderStartDateNullException ex) {
+        ErrorMessageResponse error = new ErrorMessageResponse(
+                HttpStatus.BAD_REQUEST.value(),
                 new Date(),
                 ex.getMessage()
         );

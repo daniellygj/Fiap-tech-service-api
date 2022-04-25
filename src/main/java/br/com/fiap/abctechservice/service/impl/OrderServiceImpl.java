@@ -38,7 +38,6 @@ public class OrderServiceImpl implements OrderService {
         if (orderDto.getStartOrderLocation() == null || orderDto.getStartOrderLocation().getDate() == null) {
             throw new OrderException.OrderStartDateNullException();
         }
-        orderDto.setEndOrderLocation(null);
 
         int servicesQty = orderDto.getTasks() != null ? orderDto.getTasks().size() : 0;
 
@@ -65,19 +64,6 @@ public class OrderServiceImpl implements OrderService {
         return mapper.map(ordersSaved, OrderDto.class);
     }
 
-    @Override
-    public OrderDto closeOrder(OrderDto order) {
-        if (order.getStartOrderLocation() == null || order.getStartOrderLocation().getDate() == null) {
-            throw new OrderException.OrderNotStartedException(order.getId());
-        }
-        if (order.getEndOrderLocation() != null) {
-            throw new OrderException.OrderAlreadyClosedException(order.getId());
-        }
-        Orders ordersFound = orderRepository.findById(order.getId()).orElseThrow(() -> new NotFoundException("Order", order.getId()));;
-        order.setEndOrderLocation(order.getEndOrderLocation());
-        Orders ordersSaved = orderRepository.save(ordersFound);
-        return mapper.map(ordersSaved, OrderDto.class);
-    }
 
     @Override
     public List<OrderDto> listOrders() {

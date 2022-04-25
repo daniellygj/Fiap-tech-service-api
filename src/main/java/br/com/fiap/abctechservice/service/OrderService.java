@@ -9,8 +9,6 @@ public interface OrderService {
 
     OrderDto createOrder(OrderDtoCreate order);
 
-    OrderDto closeOrder(OrderDto order);
-
     List<OrderDto> listOrders();
 
     OrderDto getOrder(Long id) ;
