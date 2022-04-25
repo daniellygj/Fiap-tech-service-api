@@ -5,6 +5,7 @@ import br.com.fiap.abctechservice.dto.OrderDtoCreate;
 import br.com.fiap.abctechservice.dto.TaskDto;
 import br.com.fiap.abctechservice.handler.exception.NotFoundException;
 import br.com.fiap.abctechservice.handler.exception.OrderException;
+import br.com.fiap.abctechservice.model.OrderLocation;
 import br.com.fiap.abctechservice.model.Orders;
 import br.com.fiap.abctechservice.model.Task;
 import br.com.fiap.abctechservice.repository.OrderRepository;
@@ -35,6 +36,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDto createOrder(OrderDtoCreate orderDto) {
+
         if (orderDto.getStartOrderLocation() == null || orderDto.getStartOrderLocation().getDate() == null) {
             throw new OrderException.OrderStartDateNullException();
         }
